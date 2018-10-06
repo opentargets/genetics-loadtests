@@ -57,7 +57,7 @@ def generateTraitSection():
 
 def enc_gql(gql, *args):
     """from multiline to an interpolated line"""
-    joint_line = " ".join(gql.map(lambda el: el.strip(), gql.splitlines()))
+    joint_line = " ".join(map(lambda el: el.strip(), gql.splitlines()))
     tupled_args = tuple(args)
     enc_line = joint_line
 
@@ -224,6 +224,209 @@ class ApiBehavior(TaskSet):
             }
         '''
         self.client.post("/graphql", json = {'query':enc_gql(gql, variant_id)})
+
+    @task(2)
+    def tagsVariantsAndStudiesForIndexVariant(self):
+        variant_id = "1_42336681_G_A"
+        gql = '''
+            query test4 { 
+                tagVariantsAndStudiesForIndexVariant(variantId:"%s", pageIndex:0, pageSize:1) { 
+                    associations { 
+                        tagVariant { 
+                            id 
+                        } 
+                        study { 
+                            studyId 
+                            traitCode 
+                            traitReported 
+                            traitEfos 
+                            pmid 
+                            pubDate 
+                            pubJournal 
+                            pubTitle 
+                            pubAuthor
+                        } 
+                        pval 
+                        nTotal 
+                        nCases 
+                        overallR2 
+                        afr1000GProp 
+                        amr1000GProp 
+                        eas1000GProp 
+                        eur1000GProp 
+                        sas1000GProp 
+                        log10Abf 
+                        posteriorProbability
+                    }
+                }
+            }
+           '''
+        self.client.post("/graphql", json={'query': enc_gql(gql, variant_id)})
+
+    @task(1)
+    def gecko(self):
+        region = generateRegion()
+        gql = '''
+            query test4 { 
+                gecko(chromosome:"%s",start:%d,end:%d) { 
+                    genes { 
+                        id 
+                        symbol 
+                        chromosome 
+                        start 
+                        end 
+                        tss 
+                        bioType 
+                        fwdStrand 
+                        exons 
+                    } 
+                    tagVariants { 
+                        id 
+                        rsId 
+                        chromosome 
+                        position 
+                        refAllele 
+                        altAllele 
+                    } 
+                    indexVariants { 
+                        id 
+                        rsId 
+                        chromosome 
+                        position 
+                        refAllele 
+                        altAllele 
+                    } 
+                    studies { 
+                        studyId 
+                        traitCode 
+                        traitReported 
+                        traitEfos 
+                        pmid 
+                        pubDate 
+                        pubJournal 
+                        pubTitle 
+                        pubAuthor
+                    } 
+                    geneTagVariants { 
+                        geneId 
+                        tagVariantId 
+                        overallScore 
+                    } 
+                    tagVariantIndexVariantStudies { 
+                        tagVariantId 
+                        indexVariantId 
+                        studyId 
+                        r2 
+                        posteriorProbability 
+                        pval
+                    }
+                }
+            }
+           '''
+        self.client.post("/graphql", json={'query': enc_gql(gql, *region)})
+
+    @task(2)
+    def genesForVariant(self):
+        variant_id = "1_42336681_G_A"
+        gql = '''
+            query test4 {
+                genesForVariant(variantId:"%s") { 
+                    gene { 
+                        id 
+                        symbol 
+                        chromosome 
+                        start 
+                        end 
+                        tss 
+                        bioType 
+                        fwdStrand 
+                        exons 
+                    } 
+                    overallScore 
+                    qtls { 
+                        typeId 
+                        sourceId 
+                        aggregatedScore 
+                        tissues { 
+                            tissue { 
+                                id 
+                                name 
+                            } 
+                            quantile 
+                            beta 
+                            pval 
+                        } 
+                    } 
+                    intervals { 
+                        typeId 
+                        sourceId 
+                        aggregatedScore 
+                        tissues { 
+                            tissue { 
+                                id 
+                                name 
+                            } 
+                            quantile 
+                            score 
+                        } 
+                    } 
+                    functionalPredictions { 
+                        typeId 
+                        sourceId 
+                        aggregatedScore 
+                        tissues { 
+                            tissue { 
+                                id 
+                                name 
+                            } 
+                            maxEffectLabel 
+                            maxEffectScore
+                        }
+                    }
+                }
+            }
+        '''
+        self.client.post("/graphql", json = {'query':enc_gql(gql, variant_id)})
+
+    @task(5)
+    def manhattan(self):
+        study_id = generateStudy()
+        gql = '''
+            query test4 {
+                manhattan(studyId:"%s") {
+                    associations {
+                        variant {
+                            id
+                            rsId
+                            chromosome
+                            position
+                            refAllele
+                            altAllele
+                            nearestGene {
+                                id
+                                symbol
+                            }
+                            nearestCodingGene { 
+                                id 
+                                symbol 
+                            } 
+                        } 
+                        pval 
+                        bestGenes { 
+                            gene { 
+                                id 
+                                symbol 
+                            } 
+                            score
+                        } 
+                        credibleSetSize 
+                        ldSetSize 
+                        totalSetSize
+                    }
+                }
+            }
+        '''
+        self.client.post("/graphql", json={'query': enc_gql(gql, study_id)})
 
 
 class WebsiteUser(HttpLocust):
