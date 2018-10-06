@@ -11,16 +11,15 @@ class ApiBehavior(TaskSet):
 
     @task(5)
     def studyInfo(self):
-        self.client.post("/graphql", json={
-            'query': 'query test4 { studyInfo(studyId:"GCST000001") { pmid pubDate pubJournal pubTitle pubAuthor studyId traitCode traitReported traitEfos } }'})
+        self.client.post("/graphql", json={'query': 'query test4 { studyInfo(studyId:"GCST000001") { pmid pubDate pubJournal pubTitle pubAuthor studyId traitCode traitReported traitEfos } }'})
 
     @task(5)
     def variantInfo(self):
         self.client.post("/graphql", json = {'query':'query test4 { variantInfo(variantId:"15_63605080_C_T") { id rsId  nearestGene { id symbol  } nearestCodingGene { id symbol } } } '})
 
-    @task(1)
-    def variantsForGene(self):
-        self.client.post("/graphql", json = {'query':'query test4 { variantsForGene(geneId:"ENSG00000132485") { gene { id symbol } variant overallScore qtls { typeId sourceId aggregatedScore } intervals { typeId sourceId aggregatedScore } functionalPredictions { typeId sourceId aggregatedScore } }'})
+    # @task(1)
+    # def variantsForGene(self):
+    #     self.client.post("/graphql", json = {'query':'query test4 { variantsForGene(geneId:"ENSG00000132485") { gene { id symbol } variant overallScore qtls { typeId sourceId aggregatedScore } intervals { typeId sourceId aggregatedScore } functionalPredictions { typeId sourceId aggregatedScore } }'})
 
     @task(2)
     def studiesForGene(self):
@@ -28,7 +27,7 @@ class ApiBehavior(TaskSet):
 
     @task(3)
     def topOverlappedStudies(self):
-        self.client.post("/graphql", json = {'query':'query test4 { topOverlappedStudies(studyId:"NEALEUKB_L03", pageSize:5) { study { studyId } topStudiesByLociOverlap { study { studyId } numOverlapLoci } } }'})
+        self.client.post("/graphql", json = {'query':'query test4 { topOverlappedStudies(studyId:"NEALEUKB_L03", pageSize:10) { study { studyId } topStudiesByLociOverlap { study { studyId } numOverlapLoci } } }'})
 
     @task(1)
     def indexVariantsAndStudiesForTagVariant(self):
@@ -39,3 +38,4 @@ class WebsiteUser(HttpLocust):
     task_set = ApiBehavior
     min_wait = 500
     max_wait = 2000
+
