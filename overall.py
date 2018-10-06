@@ -55,12 +55,43 @@ def generateTraitSection():
     pos = random.randint(0, max(len(reported_trait) - 2, 2))
     return " ".join(reported_trait[pos:pos+2])
 
+def enc_gql(gql, *args):
+    """from multiline to an interpolated line"""
+    joint_line = " ".join(gql.map(lambda el: el.strip(), gql.splitlines()))
+    tupled_args = tuple(args)
+    enc_line = joint_line
+
+    if tupled_args:
+        enc_line = joint_line % tupled_args
+
+    return enc_line
+
+
 class SearchQ(TaskSet):
     @task
     def search1(self):
         query_tokens = generateTraitSection()
-        gql = 'query test4 { search(queryString:"%s", pageIndex:0, pageSize:10) { totalGenes totalVariants totalStudies genes { id } variants { variant { id } } studies { studyId } } }' % query_tokens
-        self.client.post("/graphql", json = {'query': gql})
+        gql = '''
+            query test4 { 
+                search(queryString:"%s", pageIndex:0, pageSize:10) { 
+                    totalGenes 
+                    totalVariants 
+                    totalStudies 
+                    genes { 
+                        id 
+                    } 
+                    variants { 
+                        variant { 
+                            id 
+                        }
+                    } 
+                    studies { 
+                        studyId 
+                    } 
+                }
+            }
+        '''
+        self.client.post("/graphql", json = {'query': enc_gql(gql, query_tokens)})
 
 class ApiBehavior(TaskSet):
     tasks = {SearchQ: 1}
@@ -68,28 +99,131 @@ class ApiBehavior(TaskSet):
     @task(5)
     def studyInfo(self):
         study_id = generateStudy()
-        gql = 'query test4 { studyInfo(studyId:"%s") { pmid pubDate pubJournal pubTitle pubAuthor studyId traitCode traitReported traitEfos } }' % study_id
-        self.client.post("/graphql", json={'query': gql})
+        gql = '''
+            query test4 { 
+                studyInfo(studyId:"%s") { 
+                    pmid 
+                    pubDate 
+                    pubJournal 
+                    pubTitle 
+                    pubAuthor 
+                    studyId 
+                    traitCode 
+                    traitReported 
+                    traitEfos 
+                } 
+            }
+        '''
+        self.client.post("/graphql", json={'query': enc_gql(gql, study_id)})
 
     @task(5)
     def variantInfo(self):
-        self.client.post("/graphql", json = {'query':'query test4 { variantInfo(variantId:"15_63605080_C_T") { id rsId  nearestGene { id symbol  } nearestCodingGene { id symbol } } } '})
+        variant_id = "15_63605080_C_T"
+        gql = '''
+            query test4 { 
+                variantInfo(variantId:"%s") { 
+                    id 
+                    rsId  
+                    nearestGene { 
+                        id 
+                        symbol
+                    } 
+                    nearestCodingGene { 
+                        id 
+                        symbol 
+                    } 
+                }
+            } 
+        '''
 
-    # @task(1)
-    # def variantsForGene(self):
-    #     self.client.post("/graphql", json = {'query':'query test4 { variantsForGene(geneId:"ENSG00000132485") { gene { id symbol } variant overallScore qtls { typeId sourceId aggregatedScore } intervals { typeId sourceId aggregatedScore } functionalPredictions { typeId sourceId aggregatedScore } }'})
+        self.client.post("/graphql", json = {'query':enc_gql(gql, variant_id)})
 
     @task(2)
     def studiesForGene(self):
-        self.client.post("/graphql", json = {'query':'query test4 { studiesForGene(geneId:"ENSG00000132485") { study { studyId traitCode traitReported traitEfos pmid pubDate pubJournal pubTitle pubTitle pubAuthor ancestryInitial ancestryReplication nInitial nReplication nCases traitCategory } } }'})
+        gene_id = generateGene()
+        gql = '''
+            query test4 { 
+                studiesForGene(geneId:"%s") { 
+                    study { 
+                        studyId 
+                        traitCode 
+                        traitReported 
+                        traitEfos 
+                        pmid 
+                        pubDate 
+                        pubJournal 
+                        pubTitle 
+                        pubTitle 
+                        pubAuthor 
+                        ancestryInitial 
+                        ancestryReplication 
+                        nInitial 
+                        nReplication 
+                        nCases 
+                        traitCategory 
+                    } 
+                }
+            }        
+        '''
+        self.client.post("/graphql", json = {'query':enc_gql(gql, gene_id)})
 
     @task(3)
     def topOverlappedStudies(self):
-        self.client.post("/graphql", json = {'query':'query test4 { topOverlappedStudies(studyId:"NEALEUKB_L03", pageSize:10) { study { studyId } topStudiesByLociOverlap { study { studyId } numOverlapLoci } } }'})
+        study_id = generateStudy()
+        gql = '''
+            query test4 { 
+                topOverlappedStudies(studyId:"%s", pageSize:10) { 
+                    study { 
+                        studyId 
+                    } 
+                    topStudiesByLociOverlap { 
+                        study { 
+                            studyId 
+                        } 
+                        numOverlapLoci 
+                    } 
+                }
+            }
+        '''
+        self.client.post("/graphql", json = {'query':enc_gql(gql, study_id)})
 
     @task(1)
     def indexVariantsAndStudiesForTagVariant(self):
-        self.client.post("/graphql", json = {'query':'query test4 { indexVariantsAndStudiesForTagVariant(variantId:"1_42318930_A_G", pageIndex:0, pageSize:10) { associations { indexVariant { id } study { studyId traitCode traitReported traitEfos pmid pubDate pubJournal pubTitle pubAuthor } pval nTotal nCases overallR2 afr1000GProp amr1000GProp eas1000GProp eur1000GProp sas1000GProp log10Abf posteriorProbability } } }'})
+        variant_id = "1_42318930_A_G"
+        gql = '''
+            query test4 { 
+                indexVariantsAndStudiesForTagVariant(variantId:"%s", pageIndex:0, pageSize:10) { 
+                    associations { 
+                        indexVariant { 
+                            id 
+                        } 
+                        study { 
+                            studyId 
+                            traitCode 
+                            traitReported 
+                            traitEfos 
+                            pmid 
+                            pubDate 
+                            pubJournal 
+                            pubTitle 
+                            pubAuthor 
+                        } 
+                        pval 
+                        nTotal 
+                        nCases 
+                        overallR2 
+                        afr1000GProp 
+                        amr1000GProp 
+                        eas1000GProp 
+                        eur1000GProp 
+                        sas1000GProp 
+                        log10Abf 
+                        posteriorProbability 
+                    } 
+                } 
+            }
+        '''
+        self.client.post("/graphql", json = {'query':enc_gql(gql, variant_id)})
 
 
 class WebsiteUser(HttpLocust):
