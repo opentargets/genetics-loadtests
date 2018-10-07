@@ -5,6 +5,8 @@ gene_list = open("resources/gene_ids.txt","r").read().splitlines()
 study_list = open("resources/study_ids.txt", "r").read().splitlines()
 trait_list = open("resources/trait_list.txt", "r").read().splitlines()
 
+variant_list = open("resources/variants_sample.txt", "r").read().splitlines()
+
 chrom_lengths = {
     '1': 249250621,
     '10': 135534747,
@@ -44,6 +46,10 @@ def generateRegion():
 def generateGene():
     """return an ensembl Gene ID ENSG"""
     return random.choice(gene_list)
+
+def generateVariant():
+    """return an ensembl Gene ID ENSG"""
+    return random.choice(variant_list)
 
 def generateStudy():
     """return a random Study ID"""
@@ -118,7 +124,7 @@ class ApiBehavior(TaskSet):
 
     @task(5)
     def variantInfo(self):
-        variant_id = "15_63605080_C_T"
+        variant_id = generateVariant()
         gql = '''
             query test4 { 
                 variantInfo(variantId:"%s") { 
@@ -189,7 +195,7 @@ class ApiBehavior(TaskSet):
 
     @task(1)
     def indexVariantsAndStudiesForTagVariant(self):
-        variant_id = "1_42318930_A_G"
+        variant_id = generateVariant()
         gql = '''
             query test4 { 
                 indexVariantsAndStudiesForTagVariant(variantId:"%s", pageIndex:0, pageSize:10) { 
@@ -227,7 +233,7 @@ class ApiBehavior(TaskSet):
 
     @task(2)
     def tagsVariantsAndStudiesForIndexVariant(self):
-        variant_id = "1_42336681_G_A"
+        variant_id = generateVariant()
         gql = '''
             query test4 { 
                 tagVariantsAndStudiesForIndexVariant(variantId:"%s", pageIndex:0, pageSize:1) { 
@@ -327,7 +333,7 @@ class ApiBehavior(TaskSet):
 
     @task(2)
     def genesForVariant(self):
-        variant_id = "1_42336681_G_A"
+        variant_id = generateVariant()
         gql = '''
             query test4 {
                 genesForVariant(variantId:"%s") { 
