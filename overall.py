@@ -3,7 +3,7 @@ import random
 
 gene_list = open("resources/gene_ids.txt","r").read().splitlines()
 study_list = open("resources/study_ids.txt", "r").read().splitlines()
-trait_list = study_list = open("resources/trait_list.txt", "r").read().splitlines()
+trait_list = open("resources/trait_list.txt", "r").read().splitlines()
 
 chrom_lengths = {
     '1': 249250621,
